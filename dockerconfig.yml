@@ -27,13 +27,22 @@
       name: httpd
       source: pull
 
+  - name: Create a directory
+    file:
+      path: /root/mydata
+      state: directory
+
+  - name: Copy directory content
+    copy:
+      src: /home/surinder/mydata/
+      dest: /root/mydata
+
   - name: Launch a httpd container
     community.general.docker_container:
       name: myweb
       image: httpd
       ports:
         - "8080:80"
+      volumes:
+        - /root/mydata:/usr/local/apache2/htdocs/
 
-  - name: Copy files to docker container
-    ansible.builtin.shell:
-      cmd: docker cp /home/surinder/mydata/* myweb:/usr/local/apache2/htdocs/
