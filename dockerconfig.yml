@@ -1,0 +1,39 @@
+- name: Configure Docker
+  hosts: docker
+  tasks:
+  - name: Add docker repository
+    yum_repository:
+      name: Docker
+      description: Docker YUM repo
+      baseurl: https://download.docker.com/linux/centos/7/x86_64/stable/
+      gpgcheck: no
+      enabled: yes
+
+  - name: Install docker 
+    command: "yum install docker-ce -y --nobest"
+    ignore_errors: yes
+
+  - name: Start docker service
+    service:
+      name: docker
+      state: started
+
+  - name: Install docker python package
+    pip:
+      name: docker
+
+  - name: Pull an image
+    community.general.docker_image:
+      name: httpd
+      source: pull
+
+  - name: Launch a httpd container
+    community.general.docker_container:
+      name: myweb
+      image: httpd
+      ports:
+        - "8080:80"
+
+  - name: Copy files to docker container
+    ansible.builtin.shell:
+      cmd: docker cp /home/surinder/mydata/* myweb:/usr/local/apache2/htdocs/
